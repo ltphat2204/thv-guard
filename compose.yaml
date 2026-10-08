@@ -1,3 +1,5 @@
+name: tuan-hung-vu-technologies
+
 services:
   web:
     build:

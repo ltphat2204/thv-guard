@@ -4,95 +4,95 @@ import { useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { company, contactEmail, localized, mailLink, type Locale } from "@/lib/i18n";
 
-type Choice = readonly [value: string, en: string, vi: string, zh: string];
+type Choice = readonly [value: string, en: string, zh: string];
 const modes: readonly Choice[] = [
-  ["demo", "Book demo", "Đặt lịch demo", "预约演示"],
-  ["sales", "Contact sales", "Liên hệ bán hàng", "联系销售"],
-  ["partner", "Design partner", "Đối tác đồng thiết kế", "共同设计合作伙伴"],
+  ["demo", "Book demo", "预约演示"],
+  ["sales", "Contact sales", "联系销售"],
+  ["partner", "Design partner", "共同设计合作伙伴"],
 ];
 const roles: readonly Choice[] = [
-  ["cto", "CTO", "CTO", "首席技术官"],
-  ["founder", "Founder / executive", "Nhà sáng lập / lãnh đạo", "创始人 / 高管"],
-  ["engineering", "Engineering leader", "Quản lý kỹ thuật", "工程负责人"],
-  ["developer", "AI engineer", "Kỹ sư AI", "AI 工程师"],
-  ["security", "Security / compliance", "Bảo mật / tuân thủ", "安全 / 合规"],
-  ["operations", "Product / operations", "Sản phẩm / vận hành", "产品 / 运营"],
-  ["other", "Other", "Khác", "其他"],
+  ["cto", "CTO", "首席技术官"],
+  ["founder", "Founder / executive", "创始人 / 高管"],
+  ["engineering", "Engineering leader", "工程负责人"],
+  ["developer", "AI engineer", "AI 工程师"],
+  ["security", "Security / compliance", "安全 / 合规"],
+  ["operations", "Product / operations", "产品 / 运营"],
+  ["other", "Other", "其他"],
 ];
 const maturities: readonly Choice[] = [
-  ["exploring", "Exploring", "Đang nghiên cứu", "探索阶段"],
-  ["prototype", "Prototype", "Nguyên mẫu", "原型阶段"],
-  ["staging", "Staging", "Môi trường staging", "预生产阶段"],
-  ["production", "Production", "Đang vận hành thực tế", "生产阶段"],
+  ["exploring", "Exploring", "探索阶段"],
+  ["prototype", "Prototype", "原型阶段"],
+  ["staging", "Staging", "预生产阶段"],
+  ["production", "Production", "生产阶段"],
 ];
 const runtimes: readonly Choice[] = [
-  ["langchain", "LangChain", "LangChain", "LangChain"],
-  ["langgraph", "LangGraph", "LangGraph", "LangGraph"],
-  ["openai", "OpenAI Agents SDK", "OpenAI Agents SDK", "OpenAI Agents SDK"],
-  ["bedrock", "Amazon Bedrock", "Amazon Bedrock", "Amazon Bedrock"],
-  ["microsoft", "Microsoft", "Microsoft", "Microsoft"],
-  ["autogen", "AutoGen", "AutoGen", "AutoGen"],
-  ["crewai", "CrewAI", "CrewAI", "CrewAI"],
-  ["custom", "Custom runtime", "Môi trường tự xây dựng", "自建运行时"],
-  ["other", "Other / undecided", "Khác / chưa quyết định", "其他 / 尚未确定"],
+  ["langchain", "LangChain", "LangChain"],
+  ["langgraph", "LangGraph", "LangGraph"],
+  ["openai", "OpenAI Agents SDK", "OpenAI Agents SDK"],
+  ["bedrock", "Amazon Bedrock", "Amazon Bedrock"],
+  ["microsoft", "Microsoft", "Microsoft"],
+  ["autogen", "AutoGen", "AutoGen"],
+  ["crewai", "CrewAI", "CrewAI"],
+  ["custom", "Custom runtime", "自建运行时"],
+  ["other", "Other / undecided", "其他 / 尚未确定"],
 ];
 const actions: readonly Choice[] = [
-  ["refund", "Issue refunds", "Hoàn tiền", "发起退款"],
-  ["procurement", "Create purchase orders", "Tạo đơn mua hàng", "创建采购订单"],
-  ["subscription", "Modify subscriptions / issue credits", "Sửa gói dịch vụ / cấp tín dụng", "修改订阅 / 发放额度"],
-  ["http", "External API / HTTP calls", "Gọi API / HTTP bên ngoài", "外部 API / HTTP 调用"],
-  ["database", "Database reads / writes", "Đọc / ghi cơ sở dữ liệu", "数据库读写"],
-  ["crm", "CRM / business system updates", "Cập nhật CRM / hệ thống nghiệp vụ", "更新 CRM / 业务系统"],
-  ["cloud", "Cloud / infrastructure changes", "Thay đổi đám mây / hạ tầng", "云服务 / 基础设施变更"],
-  ["execution", "Code / shell execution", "Thực thi mã / lệnh shell", "执行代码 / shell 命令"],
-  ["data", "Sensitive data access", "Truy cập dữ liệu nhạy cảm", "访问敏感数据"],
-  ["other", "Other actions", "Hành động khác", "其他操作"],
+  ["refund", "Issue refunds", "发起退款"],
+  ["procurement", "Create purchase orders", "创建采购订单"],
+  ["subscription", "Modify subscriptions / issue credits", "修改订阅 / 发放额度"],
+  ["http", "External API / HTTP calls", "外部 API / HTTP 调用"],
+  ["database", "Database reads / writes", "数据库读写"],
+  ["crm", "CRM / business system updates", "更新 CRM / 业务系统"],
+  ["cloud", "Cloud / infrastructure changes", "云服务 / 基础设施变更"],
+  ["execution", "Code / shell execution", "执行代码 / shell 命令"],
+  ["data", "Sensitive data access", "访问敏感数据"],
+  ["other", "Other actions", "其他操作"],
 ];
 const controls: readonly Choice[] = [
-  ["policy", "Allow / block policies", "Chính sách cho phép / chặn", "允许 / 阻止策略"],
-  ["approval", "Human approval", "Phê duyệt của con người", "人工审批"],
-  ["binding", "Bind approval to exact parameters", "Gắn phê duyệt đúng tham số", "将审批绑定确切参数"],
-  ["state", "Verify transaction state / prevent replay", "Xác minh trạng thái / chống phát lại", "验证交易状态 / 防止重放"],
-  ["privacy", "Privacy / personal data", "Quyền riêng tư / dữ liệu cá nhân", "隐私 / 个人数据"],
-  ["budget", "Budgets / quotas", "Ngân sách / hạn mức", "预算 / 配额"],
-  ["audit", "Audit evidence", "Bằng chứng kiểm toán", "审计证据"],
-  ["consistency", "Consistent controls across agents", "Kiểm soát nhất quán giữa các tác tử", "跨智能体的一致控制"],
-  ["other", "Other controls", "Biện pháp kiểm soát khác", "其他控制措施"],
+  ["policy", "Allow / block policies", "允许 / 阻止策略"],
+  ["approval", "Human approval", "人工审批"],
+  ["binding", "Bind approval to exact parameters", "将审批绑定确切参数"],
+  ["state", "Verify transaction state / prevent replay", "验证交易状态 / 防止重放"],
+  ["privacy", "Privacy / personal data", "隐私 / 个人数据"],
+  ["budget", "Budgets / quotas", "预算 / 配额"],
+  ["audit", "Audit evidence", "审计证据"],
+  ["consistency", "Consistent controls across agents", "跨智能体的一致控制"],
+  ["other", "Other controls", "其他控制措施"],
 ];
 
 const pilotOptions: readonly Choice[] = [
-  ["yes", "Yes", "Có", "是"],
-  ["maybe", "Maybe", "Có thể", "可能"],
-  ["no", "No", "Không", "否"],
+  ["yes", "Yes", "是"],
+  ["maybe", "Maybe", "可能"],
+  ["no", "No", "否"],
 ];
 
 function copy(locale: Locale) {
-  const t = (en: string, vi: string, zh: string) => localized(locale, en, vi, zh);
+  const t = (en: string, zh: string) => localized(locale, en, zh);
   return {
-    mode: t("Request type", "Loại yêu cầu", "请求类型"),
-    name: t("Full name", "Họ và tên", "姓名"),
-    email: t("Work email", "Email công việc", "工作邮箱"),
-    company: t("Company", "Công ty", "公司"),
-    role: t("Role", "Vai trò", "职位"),
-    maturity: t("Agent maturity", "Mức độ triển khai tác tử", "智能体部署阶段"),
-    runtime: t("Runtime / framework (optional)", "Môi trường / framework (không bắt buộc)", "运行时 / 框架（选填）"),
-    actions: t("Which actions should agents take?", "Tác tử cần thực hiện những hành động nào?", "智能体需要执行哪些操作？"),
-    controls: t("Which controls are hardest today?", "Biện pháp kiểm soát nào khó thực hiện nhất hiện nay?", "目前哪些控制措施最难实现？"),
-    useCase: t("Concrete use case (optional)", "Tình huống sử dụng cụ thể (không bắt buộc)", "具体使用场景（选填）"),
-    pilot: t("Would you consider a paid pilot? (optional; not a commitment)", "Bạn có cân nhắc pilot trả phí? (tùy chọn; không cam kết mua)", "是否考虑付费试点？（选填；不构成承诺）"),
-    consent: t(`I agree to share these details with ${company} and be contacted about this request.`, `Tôi đồng ý chia sẻ thông tin này với ${company} và được liên hệ về yêu cầu này.`, `我同意向 ${company} 分享这些信息，并就此请求接受联系。`),
-    choose: t("Select an option", "Chọn một mục", "请选择"),
-    required: t("Required", "Bắt buộc", "必填"),
-    selectMany: t("Select at least one; multiple choices allowed.", "Chọn ít nhất một mục; có thể chọn nhiều mục.", "请至少选择一项；可多选。"),
-    invalid: t("Please check required fields, email format, and length limits. Select at least one action and one control, and confirm consent.", "Vui lòng kiểm tra các mục bắt buộc, định dạng email và giới hạn độ dài. Chọn ít nhất một hành động, một biện pháp kiểm soát và xác nhận đồng ý.", "请检查必填项、邮箱格式和长度限制。至少选择一项操作和一项控制措施，并确认同意。"),
-    prepared: t("Request prepared — not sent or received. Your email app may open; you must send the message yourself. If nothing opens, copy the request below and email it directly.", "Đã soạn yêu cầu — chưa gửi hoặc được tiếp nhận. Ứng dụng email có thể mở; bạn phải tự gửi thư. Nếu không có ứng dụng nào mở, hãy sao chép yêu cầu bên dưới và gửi email trực tiếp.", "请求已准备好 — 尚未发送或接收。邮箱应用可能会打开；您必须自行发送邮件。如果没有打开任何应用，请复制下方请求并直接发送邮件。"),
-    mailError: t("Your email app could not be opened. Copy the request below and email it directly; nothing has been sent.", "Không thể mở ứng dụng email. Hãy sao chép yêu cầu bên dưới và gửi email trực tiếp; chưa có thông tin nào được gửi.", "无法打开邮箱应用。请复制下方请求并直接发送邮件；尚未发送任何信息。"),
-    clipboardError: t("Copy was unavailable. Select and copy the request below manually; nothing has been sent.", "Không thể sao chép tự động. Hãy chọn và sao chép yêu cầu bên dưới thủ công; chưa có thông tin nào được gửi.", "无法自动复制。请手动选择并复制下方请求；尚未发送任何信息。"),
-    copied: t("Copied to clipboard — not sent. Paste it into an email and send it yourself.", "Đã sao chép — chưa gửi. Hãy dán vào email và tự gửi thư.", "已复制到剪贴板 — 尚未发送。请粘贴到邮件中并自行发送。"),
-    subject: t("Subject", "Tiêu đề", "主题"),
-    recipient: t("To", "Gửi đến", "收件人"),
-    yes: t("Yes", "Có", "是"),
-    unspecified: t("Not specified", "Chưa cung cấp", "未填写"),
+    mode: t("Request type", "请求类型"),
+    name: t("Full name", "姓名"),
+    email: t("Work email", "工作邮箱"),
+    company: t("Company", "公司"),
+    role: t("Role", "职位"),
+    maturity: t("Agent maturity", "智能体部署阶段"),
+    runtime: t("Runtime / framework (optional)", "运行时 / 框架（选填）"),
+    actions: t("Which actions should agents take?", "智能体需要执行哪些操作？"),
+    controls: t("Which controls are hardest today?", "目前哪些控制措施最难实现？"),
+    useCase: t("Concrete use case (optional)", "具体使用场景（选填）"),
+    pilot: t("Would you consider a paid pilot? (optional; not a commitment)", "是否考虑付费试点？（选填；不构成承诺）"),
+    consent: t(`I agree to share these details with ${company} and be contacted about this request.`, `我同意向 ${company} 分享这些信息，并就此请求接受联系。`),
+    choose: t("Select an option", "请选择"),
+    required: t("Required", "必填"),
+    selectMany: t("Select at least one; multiple choices allowed.", "请至少选择一项；可多选。"),
+    invalid: t("Please check required fields, email format, and length limits. Select at least one action and one control, and confirm consent.", "请检查必填项、邮箱格式和长度限制。至少选择一项操作和一项控制措施，并确认同意。"),
+    prepared: t("Request prepared — not sent or received. Your email app may open; you must send the message yourself. If nothing opens, copy the request below and email it directly.", "请求已准备好 — 尚未发送或接收。邮箱应用可能会打开；您必须自行发送邮件。如果没有打开任何应用，请复制下方请求并直接发送邮件。"),
+    mailError: t("Your email app could not be opened. Copy the request below and email it directly; nothing has been sent.", "无法打开邮箱应用。请复制下方请求并直接发送邮件；尚未发送任何信息。"),
+    clipboardError: t("Copy was unavailable. Select and copy the request below manually; nothing has been sent.", "无法自动复制。请手动选择并复制下方请求；尚未发送任何信息。"),
+    copied: t("Copied to clipboard — not sent. Paste it into an email and send it yourself.", "已复制到剪贴板 — 尚未发送。请粘贴到邮件中并自行发送。"),
+    subject: t("Subject", "主题"),
+    recipient: t("To", "收件人"),
+    yes: t("Yes", "是"),
+    unspecified: t("Not specified", "未填写"),
   };
 }
 
@@ -100,7 +100,7 @@ function copy(locale: Locale) {
 export function buildContactRequest(data: FormData, locale: Locale): { error: string } | { subject: string; body: string; request: string; href: string } {
   const text = copy(locale);
   const errors: string[] = [];
-  const label = (choice: Choice) => localized(locale, choice[1], choice[2], choice[3]);
+  const label = (choice: Choice) => localized(locale, choice[1], choice[2]);
   const single = (key: string, field: string, min: number, max: number, multiline = false) => {
     const entries = data.getAll(key);
     const raw = entries.length === 1 && typeof entries[0] === "string" ? entries[0] : "";
@@ -136,7 +136,7 @@ export function buildContactRequest(data: FormData, locale: Locale): { error: st
   const consent = data.getAll("consent");
   if (consent.length !== 1 || consent[0] !== "yes") errors.push(text.consent);
   if (errors.length) return { error: `${text.invalid} (${[...new Set(errors)].join("; ")})` };
-  const subject = `THV-guard — ${mode}`; // No user-entered values in email headers.
+  const subject = `${company} — ${mode}`; // No user-entered values in email headers.
   const body = [
     `${text.mode}: ${mode}`, `${text.name}: ${name}`, `${text.email}: ${email}`,
     `${text.company}: ${organization}`, `${text.role}: ${role}`, `${text.maturity}: ${maturity}`,
@@ -149,13 +149,13 @@ export function buildContactRequest(data: FormData, locale: Locale): { error: st
 
 export function ContactForm({ locale }: { locale: Locale }) {
   const text = copy(locale);
-  const t = (en: string, vi: string, zh: string) => localized(locale, en, vi, zh);
+  const t = (en: string, zh: string) => localized(locale, en, zh);
   const [mode, setMode] = useState("demo");
   const [error, setError] = useState("");
   const [request, setRequest] = useState("");
   const [status, setStatus] = useState("");
   const fallback = useRef<HTMLTextAreaElement>(null);
-  const label = (choice: Choice) => t(choice[1], choice[2], choice[3]);
+  const label = (choice: Choice) => t(choice[1], choice[2]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -208,9 +208,9 @@ export function ContactForm({ locale }: { locale: Locale }) {
 
   return <form className="contact-form panel" action={`mailto:${contactEmail}`} method="post" encType="text/plain" onSubmit={submit} onInvalidCapture={() => { setError(text.invalid); setRequest(""); setStatus(""); }} onChange={() => { setError(""); setRequest(""); setStatus(""); }} aria-describedby="contact-intro contact-errors">
     <div className="form-intro" id="contact-intro">
-      <h2>{t("Start with your real use case", "Bắt đầu từ tình huống thực tế của bạn", "从您的真实使用场景开始")}</h2>
-      <p className="muted">{t("This research preview prepares an email to our team. It does not send or store your request. You choose whether to send it in your own email app.", "Bản xem trước nghiên cứu này soạn email gửi đến nhóm chúng tôi. Trang không gửi hoặc lưu yêu cầu. Bạn tự quyết định gửi thư trong ứng dụng email của mình.", "此研究预览会为您准备一封给我们团队的邮件，不会发送或存储您的请求。您可自行决定是否在邮箱应用中发送。")}</p>
-      <p className="small muted">{t("Do not include credentials, personal customer data, or confidential payloads. Required fields are marked; use case is limited to 2,000 characters.", "Không cung cấp thông tin đăng nhập, dữ liệu cá nhân của khách hàng hoặc nội dung bí mật. Các mục bắt buộc được đánh dấu; tình huống sử dụng tối đa 2.000 ký tự.", "请勿提供凭据、客户个人数据或机密内容。必填项已标明；使用场景最多 2,000 个字符。")}</p>
+      <h2>{t("Start with your real use case", "从您的真实使用场景开始")}</h2>
+      <p className="muted">{t("This research preview prepares an email to our team. It does not send or store your request. You choose whether to send it in your own email app.", "此研究预览会为您准备一封给我们团队的邮件，不会发送或存储您的请求。您可自行决定是否在邮箱应用中发送。")}</p>
+      <p className="small muted">{t("Do not include credentials, personal customer data, or confidential payloads. Required fields are marked; use case is limited to 2,000 characters.", "请勿提供凭据、客户个人数据或机密内容。必填项已标明；使用场景最多 2,000 个字符。")}</p>
     </div>
     <fieldset className="field">
       <legend>{text.mode} ({text.required})</legend>
@@ -232,12 +232,12 @@ export function ContactForm({ locale }: { locale: Locale }) {
     <label className="checkbox-row"><input type="checkbox" name="consent" value="yes" required /><span>{text.consent} ({text.required})</span></label>
     <p id="contact-errors" className="form-error" role="alert" aria-live="assertive">{error}</p>
     <p className="form-success" role="status" aria-live="polite">{status}</p>
-    <button className="button button-primary" type="submit">{t("Prepare email request", "Soạn email yêu cầu", "准备请求邮件")}</button>
-    <p className="small muted">{t("Always available: email us directly at", "Luôn có thể gửi email trực tiếp đến", "您也可随时直接发送邮件至")} <a className="mono" href={`mailto:${contactEmail}`}>{contactEmail}</a>.</p>
+    <button className="button button-primary" type="submit">{t("Prepare email request", "准备请求邮件")}</button>
+    <p className="small muted">{t("Always available: email us directly at", "您也可随时直接发送邮件至")} <a className="mono" href={`mailto:${contactEmail}`}>{contactEmail}</a>.</p>
     {request && <div className="field">
-      <label htmlFor="contact-request">{t("Your prepared request — not sent", "Yêu cầu đã soạn — chưa gửi", "已准备的请求 — 尚未发送")}</label>
+      <label htmlFor="contact-request">{t("Your prepared request — not sent", "已准备的请求 — 尚未发送")}</label>
       <textarea ref={fallback} id="contact-request" className="input mono" value={request} readOnly rows={12} />
-      <button type="button" className="button button-secondary" onClick={copyRequest}>{t("Copy request", "Sao chép yêu cầu", "复制请求")}</button>
+      <button type="button" className="button button-secondary" onClick={copyRequest}>{t("Copy request", "复制请求")}</button>
     </div>}
   </form>;
 }

@@ -10,7 +10,7 @@ const errors = [];
 page.on("pageerror", (error) => errors.push(error.message));
 await mkdir("artifacts/screenshots", { recursive: true });
 const routes = ["", "product", "simulator", "architecture", "pricing", "about", "contact", "privacy"];
-const locales = ["en", "vi", "zh"];
+const locales = ["en", "zh"];
 
 try {
   assert.equal((await page.goto(base))?.status(), 200);
@@ -25,21 +25,40 @@ try {
       assert.equal(await page.locator('link[rel="canonical"]').getAttribute("href"), `${canonicalBase}/${locale}${route ? `/${route}` : ""}`);
       assert.equal(await page.locator('link[hreflang="x-default"]').count(), 1);
       assert.equal(await page.locator('link[hreflang="zh-Hans"]').count(), 1);
+      assert.equal(await page.locator('link[hreflang="vi"]').count(), 0);
+      assert.equal(await page.locator('select option[value="vi"]').count(), 0);
+      assert.equal(await page.locator('.site-header .company-wordmark').getAttribute('aria-label'), 'Tuan Hung Vu Technologies Pte. Ltd.');
+      assert.ok((await page.title()).includes('Tuan Hung Vu Technologies Pte. Ltd.'));
+      assert.equal(/THV-guard/i.test(await page.locator('body').innerText()), false);
       assert.equal(await page.locator('script[type="application/ld+json"]').count(), 1);
+      const visibleCopy = await page.locator('body').innerText();
+      const addressText = await page.locator('.company-address').allTextContents();
+      const addressMentions = addressText.reduce((total, text) => total + (text.match(/Singapore|新加坡/g) || []).length, 0);
+      assert.equal((visibleCopy.match(/Singapore|新加坡/g) || []).length - addressMentions, route === 'about' ? 1 : 0, `Keep origin context outside factual addresses only in About: ${url}`);
+      assert.equal(await page.locator('.site-footer .company-address').textContent(), 'Ayer Rajah Industrial Estate, Singapore');
+      const organization = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent())['@graph'].find((entity) => entity['@type'] === 'Organization');
+      assert.equal(organization.location.name, 'Ayer Rajah Industrial Estate, Singapore');
+      assert.equal(organization.address.addressCountry, 'SG');
+      assert.equal(organization.address.streetAddress, undefined);
+      assert.equal(organization.address.postalCode, undefined);
+      if (route === '') assert.ok((await page.locator('.hero-footnote').textContent()).includes('BLOCK71'));
+      if (route === 'about') assert.equal(await page.locator('.company-facts dd').first().textContent(), 'BLOCK71');
+      if (route === 'about' || route === 'contact') assert.equal(await page.locator('.company-address').count(), 2);
+      assert.equal(/\bSGD\b|S\$\d/.test(visibleCopy), false, `Prices must use USD: ${url}`);
       if (route === "about") {
         assert.equal(await page.locator(".about-period").first().textContent(), "2023");
         assert.equal(await page.locator(".about-chapters article").count(), 3);
-        const origin = await page.locator(".about-chapters article").first().textContent();
+        const origin = await page.locator(".page-heading-content p").textContent();
         assert.ok(origin.includes(locale === "zh" ? "新加坡" : "Singapore"));
-        assert.ok(origin.includes({ en: "AI-security hackathon", vi: "hackathon về bảo mật AI", zh: "AI 安全黑客松" }[locale]));
+        assert.ok(origin.includes({ en: "AI-security hackathon", zh: "AI 安全黑客松" }[locale]));
         assert.equal(await page.locator(".about-company-name").textContent(), "Tuan Hung Vu Technologies Pte. Ltd.");
         const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
         assert.ok(schema["@graph"].some((entity) => entity["@type"] === "AboutPage"));
         assert.equal(schema["@graph"].find((entity) => entity["@type"] === "Organization").foundingDate, undefined);
       }
       if (route === "" || route === "pricing") {
-        assert.equal((await page.locator(".plan-price").first().textContent()).trim(), "$0 SGD");
-        assert.ok((await page.locator(".plan-price").nth(1).textContent()).startsWith("$249 SGD"));
+        assert.equal((await page.locator(".plan-price").first().textContent()).trim(), "$0 USD");
+        assert.ok((await page.locator(".plan-price").nth(1).textContent()).startsWith("$249 USD"));
         assert.equal(await page.locator(".plan-price.mono").count(), 0);
       }
       for (const width of [320, 375, 414, 768, 1440]) {
@@ -57,6 +76,7 @@ try {
     }
   }
   console.log(`PASS: all ${routes.length * locales.length} localized pages, About story/schema, SSR metadata, and five viewport widths`);
+  for (const route of routes) assert.equal((await page.goto(`${base}/vi${route ? `/${route}` : ''}`))?.status(), 404);
   assert.equal((await page.goto(`${base}/fr`))?.status(), 404);
   assert.equal((await page.goto(`${base}/en/not-a-page`))?.status(), 404);
   assert.equal((await context.request.get(`${base}/sitemap.xml`)).status(), 200);
@@ -99,7 +119,7 @@ try {
   await outcome("ALLOW");
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download JSON", exact: true }).click();
-  assert.equal((await downloadPromise).suggestedFilename(), "thv-guard-decision.json");
+  assert.equal((await downloadPromise).suggestedFilename(), "business-action-decision.json");
   await page.addInitScript(() => Object.defineProperty(navigator, "clipboard", { value: { writeText: () => Promise.reject(new Error("Denied in test")) }, configurable: true }));
   await page.reload();
   await outcome("ALLOW");
@@ -109,7 +129,7 @@ try {
   await page.screenshot({ path: "artifacts/screenshots/simulator-desktop.png", fullPage: true });
   console.log("PASS: simulator presets, exact approval, stale decisions, adversarial states, exports, and clipboard fallback");
 
-  for (const [locale, evaluateName] of [["vi", "Đánh giá hành động"], ["zh", "评估操作"]]) {
+  for (const [locale, evaluateName] of [["zh", "评估操作"]]) {
     await page.goto(`${base}/${locale}/simulator`);
     await page.getByRole("button", { name: evaluateName, exact: true }).click();
     const json = await page.locator('.sim-output section:last-child pre').textContent();
@@ -121,8 +141,8 @@ try {
   await stage.locator("summary").click();
   assert.notEqual(await stage.getAttribute("open"), null);
   await stage.locator("dd").first().waitFor({ state: "visible" });
-  await page.getByLabel("Language", { exact: true }).selectOption("vi");
-  await page.waitForURL(`${base}/vi/architecture`);
+  await page.locator('.header-language select').selectOption("zh");
+  await page.waitForURL(`${base}/zh/architecture`);
   console.log("PASS: translated simulator, expandable architecture, route-preserving language switch");
 
   await page.goto(`${base}/en/contact`);

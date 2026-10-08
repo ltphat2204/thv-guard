@@ -1,24 +1,26 @@
-# THV-guard release checklist
+# Company website launch checklist
 
-## Before any public preview
+## Before a public release
 
-- [ ] Confirm the production domain and set `NEXT_PUBLIC_SITE_URL`; rebuild and verify canonical, hreflang, sitemap, Open Graph images, robots, and indexability.
-- [ ] Approve indicative pricing (Research S$0, Team pilot S$249/month, Enterprise custom), entitlements, and public commercial copy. No billing is implemented.
-- [ ] Confirm exact Singapore enterprise backing wording. Do not add a funder name, logo, government endorsement, or certification without approved evidence.
-- [ ] Confirm THV-guard is the solution and Tuan Hung Vu Technologies Pte. Ltd. is the company.
-- [ ] Review Vietnamese and Simplified Chinese translations with native speakers.
-- [ ] Confirm contact@tuanhungvu.com is monitored, and manually send/receive a test enquiry using an email application. The website only composes mail.
-- [ ] Decide whether to enable Vercel Web Analytics; default is off. Approve privacy wording before setting `NEXT_PUBLIC_ENABLE_ANALYTICS=true`.
-- [ ] Run `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`, and `npm run test:browser` against the production build.
-- [ ] Review `npm audit` and update development lint tooling when the upstream braces vulnerability is fixed. Production dependencies must pass `npm audit --omit=dev`.
-- [ ] Recheck mobile layouts, keyboard focus, native disclosure controls, reduced motion, simulator explanations, invalid inputs, replay and evidence blocks, and email-copy fallback.
+- [ ] Confirm the sole public brand is Tuan Hung Vu Technologies Pte. Ltd.; verify full company lockups, page titles, social cards, structured data, email subjects and current logo.
+- [ ] Confirm the supplied BLOCK71 acceleration credential and address (Ayer Rajah Industrial Estate, Singapore); do not add a program cohort, street, building, unit or postal code without approved details.
+- [ ] Confirm Singapore origin and AI-security hackathon wording. Do not add an event name, award, investor, government endorsement, legal incorporation date or regional office without approved evidence.
+- [ ] Review English and Simplified Chinese copy. Verify no other language is offered, linked, generated or indexed.
+- [ ] Approve the original company monogram, navy/vermilion colors and light-first corporate presentation. Retired artwork is not served.
+- [ ] Set `NEXT_PUBLIC_SITE_URL` to the approved public origin; rebuild and verify canonical, hreflang, sitemap, robots and social images.
+- [ ] Approve indicative commercial tiers and entitlements: USD 0 research demo, USD 249/month planning tier, custom enterprise discussions. No billing is implemented.
+- [ ] Confirm contact@tuanhungvu.com is monitored. Manually send and receive a test email; the website only composes drafts.
+- [ ] Approve analytics/privacy configuration before enabling Vercel Web Analytics; default is off.
+- [ ] Run unit tests, lint, typecheck, production Docker build and browser tests.
+- [ ] Review keyboard access, touch targets, contrast, reduced motion, exact approval invalidation, missing evidence/replay blocks, form tampering and clipboard fallback.
+- [ ] Run `npm audit --omit=dev`; update the development lint dependency when upstream fixes its braces advisory.
 
-## Explicitly not launched
+## Not launched by this website
 
-Production policy engine; live API/MCP/gateway integrations; authenticated human approvals; signed artifacts; execution-time state verification; atomic transaction execution; durable replay protection; audit-integrity guarantees; compliance certification; automatic booking or email delivery.
+Production policy enforcement, live API/MCP integrations, authenticated approvals, signed artifacts, execution-time evidence retrieval, atomic business transactions, durable replay protection, audit-integrity guarantees, compliance certification, billing, automatic email delivery and appointment booking.
 
-A public preview launch means the website and local simulator are available, **not** that these future product capabilities are deployed.
+Publishing this corporate website and its local simulator does not launch those capabilities.
 
-## Product validation, not fabricated traction
+## Research validation targets
 
-The supplied PRD proposes 8 qualified technical leads, 5 deep technical conversations, 3 concrete limitations in current solutions, and 1 committed design partner as a validation gate. These are research targets, not achieved metrics. Qualification requires an active/planned write-action workflow, a concrete policy gap, and architectural influence. Maintain those records outside this codebase; no CRM or lead database is provisioned here.
+The original PRD proposes 8 qualified technical leads, 5 deep interviews, 3 concrete gaps in current tooling and 1 committed design partner. These remain research targets, not achieved traction or marketing claims. Qualification requires an active/planned write-action workflow, a concrete policy gap and architectural influence.

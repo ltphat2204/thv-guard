@@ -1,28 +1,29 @@
-# THV-guard
+# Tuan Hung Vu Technologies Pte. Ltd.
 
-> THV-guard is a research-preview AI business-action verification concept by Tuan Hung Vu Technologies Pte. Ltd. Tool access is not transaction approval.
+> A technology company exploring AI security and business-action integrity. Business logic. Protected by design.
 
-## Current status
-- Research preview; seeking technical design partners.
-- No production enforcement engine, production integrations, compliance certification, or cryptographic guarantees are claimed.
-- Refund policy simulation is local and deterministic. It does not execute payments or intercept live agent actions.
-- SGD pilot pricing is indicative only, not a live offer or subscription.
+## Company and origin
+- Sole company brand: Tuan Hung Vu Technologies Pte. Ltd.
+- The business story began in 2023 and grew out of an AI-security hackathon in Singapore.
+- Accelerated by BLOCK71.
+- Address: Ayer Rajah Industrial Estate, Singapore. No street number, unit, building or postal code has been provided.
+- No program cohort, hackathon name, award, legal incorporation date or other regional office is claimed.
+- Contact: contact@tuanhungvu.com.
+
+## Current work
+- A research preview for deterministic verification of AI business actions, not a production enforcement engine.
+- Local refund simulation checks business rules, remaining balance, exact approval binding, expiry, replay evidence, and missing trusted state.
+- No live agent interception, production integrations, compliance certification, or cryptographic guarantees are claimed.
+- USD pilot prices are indicative planning tiers, not a live subscription offer.
 
 ## Pages
-- [About us](/en/about): Business story beginning in 2023, Singapore origins in an AI-security hackathon, and the motivation for guarding business logic. The story start is not a claim about the company’s legal incorporation date.
-- [Product](/en/product): Intended capabilities and product principles.
+- [About us](/en/about): Singapore origin and the motivation behind guarding business logic.
+- [Product](/en/product): Proposed business-action verification capabilities.
 - [Simulator](/en/simulator): Fictional USD 250 order, USD 50 already refunded, USD 200 remaining, approval threshold USD 100.
-- [Architecture](/en/architecture): Proposed action boundary, responsibilities, and failure modes.
-- [Pricing](/en/pricing): Research demo and indicative pilot discussion tiers.
-- [Contact](/en/contact): Prepare an email for contact@tuanhungvu.com; the visitor must send it themselves.
-- [Privacy](/en/privacy): Local demo data, email handling, and analytics disclosure.
+- [Architecture](/en/architecture): Proposed verification boundary and failure modes.
+- [Pricing](/en/pricing): Free research demo and indicative pilot discussions.
+- [Contact](/en/contact): Prepare an email; the visitor reviews and sends it themselves.
+- [Privacy](/en/privacy): Local data, email handling, and analytics disclosure.
 
 ## Languages
-English /en (default), Vietnamese /vi, Simplified Chinese /zh.
-
-## Identity
-Solution: THV-guard (tuanhungvu-guard).
-Company: Tuan Hung Vu Technologies Pte. Ltd.
-Regional origin: Singapore. The startup grew out of an AI-security hackathon in Singapore; no event name, award, or other regional offices are claimed.
-Contact: contact@tuanhungvu.com.
-Enterprise backing: Singapore enterprise-backed; no specific funder name is provided.
+English /en (default), Simplified Chinese /zh. No other language routes are published.

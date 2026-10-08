@@ -1,94 +1,54 @@
-# THV-guard preview architecture
+# Company website architecture
 
 ## Current system
 
-This is a Next.js App Router website using React and TypeScript. Localized marketing pages are statically rendered and suitable for CDN distribution. Interactive simulation and contact composition run in browser Client Components; the site does not intercept agent API calls or enforce real transactions.
+The Tuan Hung Vu Technologies Pte. Ltd. website uses Next.js 16 App Router, React 19, TypeScript and native CSS. Marketing/content pages are statically rendered for CDN delivery. The default Node.js runtime is used, not Edge Functions. Docker runs the Next.js standalone server as an unprivileged user on Node.js 24.
 
-Next.js uses its **default Node.js runtime**, not an Edge runtime. Serving generated pages through a CDN does not make the application an Edge function, and static rendering does not imply `output: "export"`. There is no contact Route Handler, Server Action, database, email-delivery backend, or application API interception layer in this scope.
+English and Simplified Chinese are the only supported locales. Root redirects to `/en`; unknown locales and unsupported slugs return 404. Locale validation, metadata, sitemap and language controls use the same `locales` source. There is no separate product brand.
 
-## Source responsibilities
+## Ownership
 
-| Location | Responsibility |
+| File or directory | Responsibility |
 | --- | --- |
-| `src/app/(entry)` | Root entry/redirect to the default English route |
-| `src/app/[locale]` | Locale-aware layout and page family: home, product, simulator, architecture, pricing, About us, contact, privacy |
-| `src/app/globals.css` | Shared design tokens, layout, responsive controls, and accessibility states |
-| `src/components` | Shared UI and the small interactive browser boundaries |
-| `src/components/contact-form.tsx` | Native qualification form, request validation, mail composition, clipboard/manual fallback |
-| `src/lib/i18n.ts` | Locale types, labels/tags, localized copy helper, company identity, contact recipient, encoded mail-link helper |
-| `src/lib/policy.ts` | Pure local refund evaluator, typed action/approval/state/decision contracts, mock fixtures |
-| `src/lib/about.ts` | Server-rendered company story in three languages, kept outside the client navigation copy |
-| `public/brand` | Blender-authored artwork: `thv-guard-logo.blend`, `thv-shield.png`, `thv-mark.svg` |
-| `docs/PROJECT.md` | Product scope, PRD mapping, route matrix, draft pricing, release boundaries |
+| `src/app/(entry)` | Root redirect |
+| `src/app/[locale]` | Locale layout, marketing/content routes and social card |
+| `src/components/company-brand.tsx` | Single company lockup shared by header/footer |
+| `src/components/site-header.tsx` | Navigation and English/Chinese language switching |
+| `src/components/guard-animation.tsx` | Native animated action-verification illustration, pause and reduced-motion |
+| `src/components/simulator.tsx` | Local refund controls and decision inspection |
+| `src/components/contact-form.tsx` | Validation, email-draft composition and manual fallback |
+| `src/lib/i18n.ts` | Company identity, supported locales, text selection and email helper |
+| `src/lib/content.ts`, `src/lib/about.ts` | English/Chinese content and company story |
+| `src/lib/policy.ts` | Pure deterministic refund evaluation |
+| `design.md`, `tokens.css`, `src/app/globals.css` | Shared company design system |
+| `public/brand` | Current vector monogram, PNG study and original Blender source |
 
-The routing layer validates locale and supported page slugs. `/en`, `/vi`, and `/zh` render equivalent page families; `zh` is Simplified Chinese and uses `zh-Hans`. Locale is a serializable prop at browser component boundaries. Brand names are retained rather than translated as product claims.
+The retired artwork and starter favicon are archived in ignored local artifacts, outside the served public directory. No old asset is used by current metadata or navigation.
 
-## Preview execution path
+## Simulation trust boundary
 
-1. Next.js renders localized content and the initial UI.
-2. The browser hydrates the simulator or contact form when needed.
-3. The refund simulator assembles a proposed action from local UI values and combines it with local mock evidence, a supplied clock, and any simulated approval.
-4. `evaluate` produces a decision snapshot with checks and reason codes.
-5. The UI displays that snapshot. It does not call a live tool, refund API, or storage service.
+`evaluate` accepts an explicit proposed action, trusted-state fixture, approval snapshot and clock. Amounts use safe integer cents. The fictional order is ORD-2048: USD 250 paid, USD 50 previously refunded, USD 200 remaining, approval threshold USD 100.
 
-Architecture-page explanations describe a possible production boundary. They are not evidence that gateway interception, adapters, approval infrastructure, or execution infrastructure already exists.
+Checks cover valid inputs and clock, required evidence, authorized tool, order/currency agreement, remaining balance, action expiry, action-ID replay, and exact unexpired approval binding. Approval includes the action, agent, requesting principal, tool, order, amount, currency, recipient and expiry. Changing any binding parameter invalidates the old approval. An approval never overrides the refundable balance.
 
-## Refund evaluator contract
+The evaluator returns ALLOW, REQUIRE_APPROVAL or BLOCK, reason codes, checks and detached input snapshots. Editing UI context clears its current decision and exports. JSON can be copied or downloaded; clipboard denial and unavailable downloads have visible fallback messages.
 
-`ProposedAction` includes action ID, agent ID, requesting principal, tool, order ID, integer amount in cents, currency, recipient, and expiry. `TrustedState` includes the order and currency, paid and refunded amounts, previously executed action IDs, and evidence source. `ApprovalBinding` contains an approval ID, an exact action snapshot, and approval expiry. `EvaluationContext` supplies those values and the clock.
+The browser supplies all evidence and approval for the demo. There is no live API interception, authenticated approver, authoritative policy server, payment execution, durable replay ledger or immutable audit store. A decision is not execution. Production work would require trusted evidence, atomic execution, stale-state checks, bypass resistance and audit-integrity design.
 
-Monetary parsing accepts plain nonnegative decimal syntax with at most two decimal places and converts it to safe integer cents. Decisions reject invalid/nonpositive requested amounts, invalid clocks, absent/invalid evidence, an unauthorized tool, order/currency mismatch, excess remaining balance, expired action, replayed action ID, or expired/mismatched approval. Missing approval above the automatic threshold is a separate `REQUIRE_APPROVAL` result, not permission to execute.
+## Email composition boundary
 
-The fixture uses USD 250 paid, USD 50 previously refunded, USD 200 remaining, threshold USD 100, order ORD-2048, and tool `issue_refund`. The threshold comparison is inclusive. A bound USD 150 approval cannot authorize a later USD 180 proposal. Every bound action field must remain equal; merely remaining under the balance is insufficient.
+The native form is revalidated from FormData before mail composition. Full name is trimmed to 2–100 characters; company 2–160; email is checked for syntax and control characters, max 254. Mode, role, maturity, optional runtime and paid-pilot values are allowlisted. Repeated singleton fields, unknown choices, duplicate multiselect values, uploaded files and absent consent are rejected. Optional use-case text is capped at 2,000 characters with normalized line breaks.
 
-`DecisionRecord` includes a decision identifier, principal/agent/action/tool references, monetary context, policy version, approval status, result, reasons, evaluation time, checks, and copies of the input snapshots. `simulationOnly: true` makes the demonstration boundary explicit. Snapshots protect earlier displayed records from later UI edits; they are not cryptographic attestations.
+The subject includes only the company name and an allowlisted request mode. User values remain in the encoded email body for the fixed recipient contact@tuanhungvu.com. Valid submission prepares a draft and may open the visitor’s mail handler. The website explicitly reports not sent or received; only the visitor can send it. A read-only request and copy/manual fallback remain available. Editing clears the previous draft.
 
-### What is not production enforcement
+There is no contact API, database, CRM, booking calendar, delivery retry or confirmation email. No application data is persisted in browser storage or transmitted to a backend. A mailto draft cannot prove handler availability or delivery.
 
-The browser controls the action, mock evidence, clock, and simulated approval. There is no authenticated approver, verified evidence provider, server-owned policy authority, atomic reservation/execution, durable replay ledger, or immutable audit store. Evaluation and execution are not an implemented transaction. Refreshing the preview does not maintain a protected history.
+## Metadata and analytics
 
-A production implementation would have to establish those trust boundaries and fail closed when authoritative evidence or enforcement is unavailable. Approval must remain bound to the exact action at execution time, and replay and concurrent spending checks must be enforced where execution occurs. These are outstanding requirements, not deployed capabilities or recommendations to add dependencies to this website.
+`NEXT_PUBLIC_SITE_URL` controls canonical URLs and sitemap. Until a non-local origin is set, pages are noindex and robots disallows crawling. Organization schema uses the full company identity; AboutPage and visible FAQ schema describe current content. No unverified legal incorporation date or certification is published.
 
-## Contact composition boundary
+Vercel Web Analytics is disabled unless `NEXT_PUBLIC_ENABLE_ANALYTICS=true`. Enable it in the hosting project and approve telemetry first. Privacy copy follows the build flag. Custom events record aggregate scenario/decision/contact-mode information, not names, emails, form values, action payloads or monetary amounts. Prepared contact is not a delivered application.
 
-`ContactForm({ locale })` is a named Client Component export. It uses native inputs, selects, radio buttons, checkboxes, fieldsets, and a form submit handler. Required native constraints improve immediate usability; `buildContactRequest(FormData, locale)` validates again at the composition boundary because controls and `FormData` can be modified.
+## Checks
 
-Validation includes:
-
-- Trimmed full name: 2–100 characters; company: 2–160 characters.
-- Work email: format check, maximum 254 characters, no control characters or injected newlines.
-- Allowlisted mode, role, maturity, and optional runtime values; repeated singleton fields are rejected.
-- Actions and difficult controls read with `FormData.getAll`, at least one per group, allowed values only, no duplicate values, no uploaded-file values.
-- Optional concrete use case: at most 2,000 characters after trimming; multiline input is retained with normalized newlines. Other control characters and invalid surrogate text are rejected.
-- Optional paid-pilot interest accepts only the allowlisted Yes / Maybe / No values. Consent requires exactly one explicit affirmative value.
-
-Single-line fields reject control characters rather than silently placing them into headers. The subject uses only the product name and a validated, translated mode label, never arbitrary user input. `mailLink(subject, body)` from `src/lib/i18n.ts` percent-encodes the subject and body for a fixed recipient, **contact@tuanhungvu.com**. User-entered content stays in the body and cannot introduce additional query parameters or email headers.
-
-On a valid submission, the component keeps a read-only request in browser memory and attempts to open a `mailto:` URL. The status says **not sent or received** and instructs the user to send the message themselves. No browser signal proves that a handler opened or that mail was delivered. The native form action also targets `mailto:` rather than posting personal details to a website endpoint; the always-visible direct email link is the reliable manual path when scripting or handler support is unavailable.
-
-The copy button writes to the clipboard only on the user's explicit action. When clipboard access is absent, denied, or fails, an accessible error is shown and the read-only text is focused/selected for manual copying. Validation errors and compose/copy status are localized and announced with live regions. Editing the form clears a previously prepared draft in the UI so it is not mistaken for the updated request.
-
-There is no honeypot, server rate limiter, or bot-submission queue because there is no server submission endpoint. There is also no delivery retry mechanism, confirmation email, CRM sync, booking-calendar integration, or lead database. Adding any of these would change the agreed user-composed-email scope.
-
-## Privacy and observability
-
-Contact values and simulator inputs are not persisted to browser storage, sent to an application backend, or placed in a site database. A user can explicitly copy a draft or choose to send it through their own email application; its handling then follows that application's and provider's behavior. Hosting/platform access logs are separate from application form submission and should not be confused with lead capture.
-
-Vercel Web Analytics is installed but **disabled by default**. Set `NEXT_PUBLIC_ENABLE_ANALYTICS=true` only after enabling Web Analytics for the Vercel project and approving telemetry. The localized privacy disclosure switches at build time with this flag. Tracking covers page views and aggregate simulator starts/results, scenario switches, simulated approvals, architecture expansion, and prepared-contact modes. No form values, email addresses, names, action payloads, or transaction amounts are sent as custom properties. The default build loads no analytics script and sends no analytics events. A prepared contact event is not an application received or a booking completed.
-
-## Configuration and checks
-
-The website does not require API keys, database credentials, payment credentials, or email-service secrets. `NEXT_PUBLIC_SITE_URL` controls the public origin used by shared site metadata; its fallback is `http://localhost:3000`. Set an approved deployment origin before publishing canonical metadata. Public environment variables must never hold secrets.
-
-Use the existing project commands:
-
-```sh
-npm run dev
-npm run test
-npm run lint
-npm run build
-```
-
-Tests should preserve the important trust-boundary examples: automatic threshold, missing evidence, excess balance, expiry, replay, exact approval binding after an edit, invalid money syntax, and contact data tampering. Browser acceptance should additionally exercise every locale, keyboard access, validation announcements, absent mail handler, and denied clipboard access. No automated check can claim mail receipt from successful `mailto:` construction.
-
-The production build and static route output verify website packaging, not enforcement readiness. Deployment approval, confirmed launch status, commercial approval, and production security validation remain separate gates.
+`npm test`, `npm run lint`, `npm run typecheck`, `npm run build` and browser checks against the production Docker image. Browser tests cover all 16 current routes, removed locales, company identity, metadata, responsive widths, exact approvals, adversarial conditions, contact tampering, exports and copy fallback. A successful build demonstrates website packaging, not enforcement readiness or email delivery.
