@@ -32,6 +32,19 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local coding-agent configuration and design cache
+/.claude/
+/.agents/
+/.hallmark/
+
+# generated verification output
+/artifacts/
+
+# Blender backups
+*.blend1
+*.blend2
 
 # vercel
 .vercel
